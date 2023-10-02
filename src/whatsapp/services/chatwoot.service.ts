@@ -1,4 +1,5 @@
 import ChatwootClient from '@figuro/chatwoot-sdk';
+import { isJidGroup } from '@whiskeysockets/baileys';
 import axios from 'axios';
 import FormData from 'form-data';
 import { createReadStream, readFileSync, unlinkSync, writeFileSync } from 'fs';
@@ -1126,6 +1127,12 @@ export class ChatwootService {
                 presence: 'composing',
               },
             };
+
+            const numberWA = await waInstance?.whatsappNumber({ numbers: [chatId] });
+            const isWA = numberWA[0];
+            if (!isWA.exists && !isJidGroup(isWA.jid) && !isWA.jid.includes('@broadcast')) {
+              return isWA;
+            }
 
             const message = await waInstance?.textMessage(data);
             await this.updateMessage(instance, accountId, conversationId, messageId, message?.key?.id);
