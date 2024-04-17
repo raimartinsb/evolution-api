@@ -498,6 +498,7 @@ export class ChatwootService {
       this.logger.verbose('is group: ' + isGroup);
 
       const chatId = isGroup ? body.key.remoteJid : body.key.remoteJid.split('@')[0];
+      const identifier = isGroup ? body.key.participant.split('@')[0] : body.key.remoteJid;
 
       this.logger.verbose('chat id: ' + chatId);
 
@@ -532,6 +533,7 @@ export class ChatwootService {
             await this.updateContact(instance, findParticipant.id, {
               name: body.pushName,
               avatar_url: picture_url.profilePictureUrl || null,
+              identifier: identifier,
             });
           }
         } else {
@@ -558,6 +560,7 @@ export class ChatwootService {
         if (findContact) {
           contact = await this.updateContact(instance, findContact.id, {
             avatar_url: picture_url.profilePictureUrl || null,
+            identifier: identifier,
           });
         } else {
           const jid = isGroup ? null : body.key.remoteJid;
@@ -577,10 +580,12 @@ export class ChatwootService {
             contact = await this.updateContact(instance, findContact.id, {
               name: nameContact,
               avatar_url: picture_url.profilePictureUrl || null,
+              identifier: identifier,
             });
           } else {
             contact = await this.updateContact(instance, findContact.id, {
               avatar_url: picture_url.profilePictureUrl || null,
+              identifier: identifier,
             });
           }
           if (!contact) {
@@ -611,6 +616,7 @@ export class ChatwootService {
         this.logger.verbose('update contact name in chatwoot');
         await this.updateContact(instance, contactId, {
           name: nameContact,
+          identifier: identifier,
         });
       }
 
