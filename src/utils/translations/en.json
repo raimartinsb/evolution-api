@@ -9,6 +9,7 @@
   "cw.inbox.clearCache": "✅ {{inboxName}} instance cache cleared.",
   "cw.inbox.notFound": "⚠️ {{inboxName}} instance not found.",
   "cw.inbox.status": "⚠️ {{inboxName}} instance status: *{{state}}*.",
+  "cw.inbox.status.closed": "🚨 The message was not sent because the {{inboxName}} instance is closed",
   "cw.import.startImport": "💬 Starting to import messages. Please wait...",
   "cw.import.importingMessages": "💬 Importing messages. More one moment...",
   "cw.import.messagesImported": "💬 {{totalMessagesImported}} messages imported. Refresh page to see the new messages.",

@@ -9,6 +9,7 @@
   "cw.inbox.clearCache": "✅ Instância *{{inboxName}}* cache removido.",
   "cw.inbox.notFound": "⚠️ Instância *{{inboxName}}* não encontrada.",
   "cw.inbox.status": "⚠️ Status da instância {{inboxName}}: *{{state}}*.",
+  "cw.inbox.status.closed": "🚨 A mensagem não foi enviada, pois a conexão com o WhatsApp da caixa de entrada {{inboxName}} está fechada.",
   "cw.import.startImport": "💬 Iniciando importação de mensagens. Por favor, aguarde...",
   "cw.import.importingMessages": "💬 Importando mensagens. Mais um momento...",
   "cw.import.messagesImported": "💬 {{totalMessagesImported}} mensagens importadas. Atualize a página para ver as novas mensagens.",

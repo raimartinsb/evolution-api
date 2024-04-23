@@ -1265,6 +1265,25 @@ export class ChatwootService {
       }
 
       if (body.message_type === 'outgoing' && body?.conversation?.messages?.length && chatId !== '123456') {
+        const state = waInstance?.connectionStatus;
+        // instance is close
+        if (state && state.state === 'close') {
+          const conversation = body.conversation;
+          if (client && conversation && conversation.id) {
+            await client.messages.create({
+              accountId: this.provider.account_id,
+              conversationId: conversation.id,
+              data: {
+                content: i18next.t('cw.inbox.status.closed', {
+                  inboxName: body.inbox.name,
+                }),
+                message_type: body.message_type,
+                private: true,
+              },
+            });
+            return { message: 'bot' };
+          }
+        }
         this.logger.verbose('check if is group');
 
         if (body?.conversation?.messages[0]?.source_id?.substring(0, 5) === 'WAID:') {
