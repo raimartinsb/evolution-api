@@ -4,9 +4,9 @@ import { Bull, configService } from '../../config/env.config';
 
 const queueOptions = {
   redis: {
-    port: configService.get<Bull>('BULL').REDIS.PORT,
-    host: configService.get<Bull>('BULL').REDIS.HOST,
-    password: configService.get<Bull>('BULL').REDIS.PASSWORD,
+    port: configService.get<Bull>('BULL')?.REDIS?.PORT,
+    host: configService.get<Bull>('BULL')?.REDIS?.HOST,
+    password: configService.get<Bull>('BULL')?.REDIS?.PASSWORD,
   },
 };
 
