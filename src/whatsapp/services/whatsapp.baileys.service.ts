@@ -52,7 +52,7 @@ import qrcode, { QRCodeToDataURLOptions } from 'qrcode';
 import qrcodeTerminal from 'qrcode-terminal';
 import sharp from 'sharp';
 
-import { ConfigService, ConfigSessionPhone, Database, Log, QrCode, Redis } from '../../config/env.config';
+import { Bull, ConfigService, ConfigSessionPhone, Database, Log, QrCode, Redis } from '../../config/env.config';
 import { INSTANCE_DIR } from '../../config/path.config';
 import { BadRequestException, InternalServerErrorException, NotFoundException } from '../../exceptions';
 import { dbserver } from '../../libs/db.connect';
@@ -116,6 +116,7 @@ import { RepositoryBroker } from '../repository/repository.manager';
 import { Events, MessageSubtype, TypeMediaMessage, wa } from '../types/wa.types';
 import { waMonitor } from '../whatsapp.module';
 import { CacheService } from './cache.service';
+import whatsappQueue from './whatsapp.queue.service'; // Importa o arquivo do gerenciador de filas
 import { WAStartupService } from './whatsapp.service';
 
 const retryCache = {};
@@ -154,6 +155,17 @@ export class BaileysStartupService extends WAStartupService {
 
     this.logger.verbose('close connection instance: ' + this.instanceName);
     this.client?.ws?.close();
+  }
+
+  private async processQueues() {
+    whatsappQueue.queues.forEach((queue) => {
+      queue.bull.process(async (job) => {
+        const { payload, database, settings } = job.data;
+        // Acessar a função `messages.upsert`
+        await this.messageHandle['messages.upsert'](payload, database, settings);
+        return;
+      });
+    });
   }
 
   public async getProfileName() {
@@ -787,7 +799,7 @@ export class BaileysStartupService extends WAStartupService {
     },
   };
 
-  private readonly messageHandle = {
+  public readonly messageHandle = {
     'messaging-history.set': async (
       {
         messages,
@@ -1027,6 +1039,8 @@ export class BaileysStartupService extends WAStartupService {
           this.sendDataWebhook(Events.MESSAGES_UPSERT, messageRaw);
 
           if (this.localChatwoot.enabled && !received.key.id.includes('@broadcast')) {
+            // aqui é um evento
+
             const chatwootSentMessage = await this.chatwootService.eventWhatsapp(
               Events.MESSAGES_UPSERT,
               { instanceName: this.instance.name },
@@ -1381,7 +1395,24 @@ export class BaileysStartupService extends WAStartupService {
             retryCache[msg.key.id] = msg;
             return;
           }
-          this.messageHandle['messages.upsert'](payload, database, settings);
+          if (this.configService.get<Bull>('BULL').ENABLED) {
+            for (let index = 0; index < payload.messages.length; index++) {
+              const message = payload.messages[index];
+              const queueName = message.key?.remoteJid ? message.key?.remoteJid : 'queue';
+              const newPayload = {
+                instance: this.instance,
+                event: 'messages.upsert',
+                payload: { messages: [message], type: payload.type },
+                database,
+                settings,
+              };
+              whatsappQueue.addQueue(queueName);
+              await whatsappQueue.add(queueName, newPayload);
+              this.processQueues();
+            }
+          } else {
+            this.messageHandle['messages.upsert'](payload, database, settings);
+          }
         }
 
         if (events['messages.update']) {

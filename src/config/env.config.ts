@@ -69,6 +69,15 @@ export type Redis = {
   PREFIX_KEY: string;
 };
 
+export type Bull = {
+  ENABLED: boolean;
+  REDIS: {
+    PORT: number;
+    HOST: string;
+    PASSWORD: string;
+  };
+};
+
 export type Rabbitmq = {
   ENABLED: boolean;
   MODE: string; // global, single, isolated
@@ -186,6 +195,7 @@ export interface Env {
   CLEAN_STORE: CleanStoreConf;
   DATABASE: Database;
   REDIS: Redis;
+  BULL: Bull;
   RABBITMQ: Rabbitmq;
   SQS: Sqs;
   WEBSOCKET: Websocket;
@@ -283,6 +293,14 @@ export class ConfigService {
         ENABLED: process.env?.REDIS_ENABLED === 'true',
         URI: process.env.REDIS_URI || '',
         PREFIX_KEY: process.env.REDIS_PREFIX_KEY || 'evolution',
+      },
+      BULL: {
+        ENABLED: process.env?.BULL_ENABLED === 'true' || false,
+        REDIS: {
+          PORT: Number.parseInt(process.env?.BULL_REDIS_PORT) || 6379,
+          HOST: process.env?.BULL_REDIS_HOST || '',
+          PASSWORD: process.env?.BULL_REDIS_PASSWORD || '',
+        },
       },
       RABBITMQ: {
         ENABLED: process.env?.RABBITMQ_ENABLED === 'true',

@@ -82,6 +82,13 @@ REDIS:
   URI: "redis://localhost:6379"
   PREFIX_KEY: "evolution"
 
+BULL:
+  ENABLED: false
+  REDIS:
+    PORT: 6379,
+    HOST: "localhost"
+    PASSWORD: ""
+
 RABBITMQ:
   ENABLED: false
   MODE: "global"
